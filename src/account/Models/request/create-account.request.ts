@@ -1,7 +1,7 @@
-export class CreateAccountDto{
-    readonly _id: string;
-    readonly email: string;
-    readonly telefone: string;
+export class CreateAccountRequest {
+    _id: string;
+    email: string;
+    telefone: string;
     nome: string;
     senha: string;
     ocupacao: string;
