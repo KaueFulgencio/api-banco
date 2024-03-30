@@ -1,73 +1,133 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+API do Banco
+Esta é uma API para gerenciamento de contas bancárias, incluindo operações como criação, recuperação, atualização e exclusão de contas.
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Instalação
+Clone o repositório:
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+bash
+Copy code
+git clone https://github.com/KaueFulgencio/api-banco
+Navegue até o diretório do projeto:
 
-## Description
+bash
+Copy code
+cd api-banco
+Instale as dependências do projeto:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+bash
+Copy code
+npm install
+Renomeie o arquivo .env.example para .env e configure as variáveis de ambiente conforme necessário.
 
-## Installation
+Inicie o servidor:
 
-```bash
-$ npm install
-```
+bash
+Copy code
+npm start
+Endpoints
+Criar uma nova conta
+URL: POST /accounts
 
-## Running the app
+Corpo da Requisição:
 
-```bash
-# development
-$ npm run start
+json
+Copy code
+{
+  "email": "exemplo@email.com",
+  "telefone": "(00) 12345-6789",
+  "nome": "Fulano de Tal",
+  "senha": "senha123",
+  "ocupacao": "Desenvolvedor",
+  "endereco": "Rua Exemplo, 123",
+  "tipo": "cliente",
+  "urlFotoAccount": "https://exemplo.com/foto.jpg"
+}
+Resposta de Exemplo:
 
-# watch mode
-$ npm run start:dev
+json
+Copy code
+{
+  "success": true,
+  "message": "Conta criada com sucesso",
+  "account": {
+    "_id": "5fec7c6a6df1475f42e91f32",
+    "email": "exemplo@email.com",
+    "telefone": "(00) 12345-6789",
+    "nome": "Fulano de Tal",
+    "senha": "senha123",
+    "ocupacao": "Desenvolvedor",
+    "endereco": "Rua Exemplo, 123",
+    "tipo": "cliente",
+    "urlFotoAccount": "https://exemplo.com/foto.jpg",
+    "__v": 0
+  }
+}
+Recuperar uma conta por ID
+URL: GET /accounts/:id
 
-# production mode
-$ npm run start:prod
-```
+Parâmetros de URL:
 
-## Test
+id (string): O ID da conta a ser recuperada.
+Resposta de Exemplo:
 
-```bash
-# unit tests
-$ npm run test
+json
+Copy code
+{
+  "_id": "5fec7c6a6df1475f42e91f32",
+  "email": "exemplo@email.com",
+  "telefone": "(00) 12345-6789",
+  "nome": "Fulano de Tal",
+  "senha": "senha123",
+  "ocupacao": "Desenvolvedor",
+  "endereco": "Rua Exemplo, 123",
+  "tipo": "cliente",
+  "urlFotoAccount": "https://exemplo.com/foto.jpg",
+  "__v": 0
+}
+Atualizar uma conta existente
+URL: PUT /accounts/:id
 
-# e2e tests
-$ npm run test:e2e
+Parâmetros de URL:
 
-# test coverage
-$ npm run test:cov
-```
+id (string): O ID da conta a ser atualizada.
+Corpo da Requisição:
 
-## Support
+json
+Copy code
+{
+  "email": "novoemail@email.com",
+  "telefone": "(00) 98765-4321",
+  "nome": "Novo Nome",
+  "senha": "novasenha456",
+  "ocupacao": "Designer",
+  "endereco": "Nova Rua, 456",
+  "tipo": "admin",
+  "urlFotoAccount": "https://exemplo.com/novafoto.jpg"
+}
+Resposta de Exemplo:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+json
+Copy code
+{
+  "_id": "5fec7c6a6df1475f42e91f32",
+  "email": "novoemail@email.com",
+  "telefone": "(00) 98765-4321",
+  "nome": "Novo Nome",
+  "senha": "novasenha456",
+  "ocupacao": "Designer",
+  "endereco": "Nova Rua, 456",
+  "tipo": "admin",
+  "urlFotoAccount": "https://exemplo.com/novafoto.jpg",
+  "__v": 0
+}
+Excluir uma conta existente
+URL: DELETE /accounts/:id
 
-## Stay in touch
+Parâmetros de URL:
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+id (string): O ID da conta a ser excluída.
+Resposta de Exemplo:
 
-## License
-
-Nest is [MIT licensed](LICENSE).
+json
+Copy code
+true
