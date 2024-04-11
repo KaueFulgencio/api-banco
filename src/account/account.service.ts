@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateAccountRequest } from '../account/Models/request/create-account.request';
@@ -20,15 +20,25 @@ export class AccountService {
     }
 
     async findById(id: string): Promise<Account> {
-        return await this.accountModel.findById(id).exec();
+        const account = await this.accountModel.findById(id).exec();
+        if (!account) {
+            throw new NotFoundException('Conta não encontrada');
+        }
+        return account;
     }
 
     async findByEmail(email: string): Promise<Account> {
-        return await this.accountModel.findOne({ email }).exec();
+        const account = await this.accountModel.findOne({ email }).exec();
+        if (!account) {
+            throw new NotFoundException('Conta não encontrada');
+        }
+        return account;
     }
 
     async update(id: string, updatedAccount: Account): Promise<Account> {
-        return await this.accountModel.findByIdAndUpdate(id, updatedAccount, { new: true }).exec();
+        const account = await this.findById(id);
+        Object.assign(account, updatedAccount);
+        return await account.save();
     }
 
     async delete(id: string): Promise<boolean> {
@@ -37,6 +47,10 @@ export class AccountService {
     }
 
     async authenticate(email: string, senha: string): Promise<Account> {
-        return await this.accountModel.findOne({ email, senha }).exec();
+        const account = await this.accountModel.findOne({ email, senha }).exec();
+        if (!account) {
+            throw new NotFoundException('Credenciais inválidas');
+        }
+        return account;
     }
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete, HttpCode, HttpStatus, NotFoundException } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { CreateAccountRequest } from '../account/Models/request/create-account.request';
 import { CreateAccountResponse } from '../account/Models/response/create-account.response';
@@ -15,26 +15,47 @@ export class AccountController {
 
     @Get(':id')
     async findById(@Param('id') id: string): Promise<Account> {
-        return this.accountService.findById(id);
+        const account = await this.accountService.findById(id);
+        if (!account) {
+            throw new NotFoundException('Conta não encontrada');
+        }
+        return account;
     }
 
     @Get('email/:email')
     async findByEmail(@Param('email') email: string): Promise<Account> {
-        return this.accountService.findByEmail(email);
+        const account = await this.accountService.findByEmail(email);
+        if (!account) {
+            throw new NotFoundException('Conta não encontrada');
+        }
+        return account;
     }
 
     @Put(':id')
     async update(@Param('id') id: string, @Body() updatedAccount: Account): Promise<Account> {
-        return this.accountService.update(id, updatedAccount);
+        const account = await this.accountService.update(id, updatedAccount);
+        if (!account) {
+            throw new NotFoundException('Conta não encontrada');
+        }
+        return account;
     }
 
     @Delete(':id')
     async delete(@Param('id') id: string): Promise<boolean> {
-        return this.accountService.delete(id);
+        const deleted = await this.accountService.delete(id);
+        if (!deleted) {
+            throw new NotFoundException('Conta não encontrada');
+        }
+        return deleted;
     }
 
     @Post('authenticate')
+    @HttpCode(HttpStatus.OK)
     async authenticate(@Body() credentials: { email: string, senha: string }): Promise<Account> {
-        return this.accountService.authenticate(credentials.email, credentials.senha);
+        const account = await this.accountService.authenticate(credentials.email, credentials.senha);
+        if (!account) {
+            throw new NotFoundException('Credenciais inválidas');
+        }
+        return account;
     }
 }
