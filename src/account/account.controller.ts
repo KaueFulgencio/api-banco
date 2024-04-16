@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Get, Param, Put, Delete, HttpCode, HttpStatus, NotFoundException } from '@nestjs/common';
 import { AccountService } from './account.service';
-import { CreateAccountRequest } from '../account/Models/request/create-account.request';
-import { CreateAccountResponse } from '../account/Models/response/create-account.response';
+import { CreateAccountRequest } from './Models/index';
+import { CreateAccountResponse } from './Models/index';
 import { Account } from '../account/interfaces/account.interface';
 
 @Controller('accounts')
