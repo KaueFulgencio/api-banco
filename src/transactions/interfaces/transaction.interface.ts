@@ -1,8 +1,9 @@
-export interface Transaction {
-    _id: string;
-    fromAccount: string;
-    toAccount: string;
-    amount: number;
-    type: string; 
-    timestamp: Date;
+import { Document } from 'mongoose';
+
+export interface Transaction extends Document {
+  accountId: string;
+  type: string;
+  amount: number;
+  date: Date;
+  description?: string;
 }

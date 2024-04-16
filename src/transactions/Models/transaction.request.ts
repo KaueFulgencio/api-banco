@@ -6,7 +6,7 @@ export class CreateTransactionRequest {
 
     @IsString()
     toAccount: string;
-
+     
     @IsNumber()
     amount: number;
 
