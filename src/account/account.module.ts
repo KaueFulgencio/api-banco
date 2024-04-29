@@ -6,9 +6,9 @@ import { AccountSchema } from './interfaces/account.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'Account', schema: AccountSchema }]) 
+    MongooseModule.forFeature([{ name: 'Account', schema: AccountSchema }])
   ],
   controllers: [AccountController],
-  providers: [AccountService]
+  providers: [AccountService,]
 })
 export class AccountModule {}

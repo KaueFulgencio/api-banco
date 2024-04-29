@@ -3,6 +3,7 @@ import { AccountService } from './account.service';
 import { CreateAccountRequest } from './Models/index';
 import { CreateAccountResponse } from './Models/index';
 import { Account } from '../account/interfaces/account.interface';
+import { UpdateBalanceRequest } from './dto/update-amount.dto';
 
 @Controller('accounts')
 export class AccountController {
@@ -34,6 +35,15 @@ export class AccountController {
     @Put(':id')
     async update(@Param('id') id: string, @Body() updatedAccount: Account): Promise<Account> {
         const account = await this.accountService.update(id, updatedAccount);
+        if (!account) {
+            throw new NotFoundException('Conta não encontrada');
+        }
+        return account;
+    }
+
+    @Put(':id/saldo')
+    async updateBalance(@Param('id') id: string, @Body() updateBalanceRequest: UpdateBalanceRequest): Promise<Account> {
+        const account = await this.accountService.updateBalance(id, updateBalanceRequest);
         if (!account) {
             throw new NotFoundException('Conta não encontrada');
         }

@@ -4,25 +4,30 @@ import { Model } from 'mongoose';
 import { Transaction } from './interfaces/transaction.interface';
 import { CreateTransactionRequest } from './Models/index';
 import { CreateTransactionResponse } from './Models/index';
-import { CreateTransactionDto } from './dto/transaction.dto';
+import { TransferRequest } from './dto/transaction.dto';
+import { AccountService } from 'src/account/account.service';
+// import { AccountService } from '../account/account.service'; 
+// import { UpdateBalanceRequest } from 'src/account/dto/update-amount.dto'; 
 
 @Injectable()
 export class TransactionsService {
-    constructor(@InjectModel('Transaction') private readonly transactionModel: Model<Transaction>) {}
+    constructor(
+        @InjectModel('Transaction') private readonly transactionModel: Model<Transaction>,
+        // private readonly accountService: AccountService  
+    ) {}
 
-
-    async create(createTransactionDto: CreateTransactionDto): Promise<Transaction> {
+    async create(createTransactionDto: TransferRequest): Promise<Transaction> {
         const createdTransaction = new this.transactionModel(createTransactionDto);
         return createdTransaction.save();
-      }
-    
-      async findAll(accountId: string): Promise<Transaction[]> {
+    }
+
+    async findAll(accountId: string): Promise<Transaction[]> {
         return this.transactionModel.find({ accountId }).exec();
-      }
-    
-      async findById(id: string): Promise<Transaction> {
+    }
+
+    async findById(id: string): Promise<Transaction> {
         return this.transactionModel.findById(id).exec();
-      }
+    }
 
     async createTransaction(transactionData: CreateTransactionRequest): Promise<CreateTransactionResponse> {
         const createdTransaction = new this.transactionModel(transactionData);
@@ -45,4 +50,9 @@ export class TransactionsService {
     async getTransactionsByAccountId(accountId: string): Promise<Transaction[]> {
         return await this.transactionModel.find({ $or: [{ fromAccount: accountId }, { toAccount: accountId }] }).exec();
     }
+
+    async transfer(transferRequest: TransferRequest): Promise<void> {
+        // Lógica de transferência aqui
+    }
+    
 }

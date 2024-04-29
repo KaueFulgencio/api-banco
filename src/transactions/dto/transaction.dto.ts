@@ -1,6 +1,6 @@
 import { IsString, IsNumber, IsDate } from 'class-validator';
 
-export class CreateTransactionDto {
+export class TransferRequest {
     @IsString()
     fromAccount: string;
 
@@ -13,6 +13,5 @@ export class CreateTransactionDto {
     @IsString()
     type: string;
 
-    @IsDate()
     timestamp: Date;
 }

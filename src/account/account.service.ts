@@ -4,14 +4,15 @@ import { Model } from 'mongoose';
 import { CreateAccountRequest } from './Models/index';
 import { CreateAccountResponse } from './Models/index';
 import { Account } from '../account/interfaces/account.interface';
+import { UpdateBalanceRequest } from './dto/update-amount.dto';
 
 @Injectable()
 export class AccountService {
     constructor(@InjectModel('Account') private readonly accountModel: Model<Account>) {}
 
     async create(createAccountRequest: CreateAccountRequest): Promise<CreateAccountResponse> {
-        const createdAccount = new this.accountModel(createAccountRequest);
-        const savedAccount = await createdAccount.save();
+        const newAccount = new this.accountModel(createAccountRequest);
+        const savedAccount = await newAccount.save();
         return {
             success: true,
             message: 'Conta criada com sucesso',
@@ -19,26 +20,50 @@ export class AccountService {
         };
     }
 
-    async findById(id: string): Promise<Account> {
-        const account = await this.accountModel.findById(id).exec();
+    async updateBalance(id: string, updateBalanceRequest: UpdateBalanceRequest): Promise<Account> {
+        const account = await this.findById(id);
         if (!account) {
             throw new NotFoundException('Conta não encontrada');
         }
-        return account;
+    
+        account.saldo += updateBalanceRequest.amount;
+        const updatedAccount = await account.save();
+        return updatedAccount;
     }
 
-    async findByEmail(email: string): Promise<Account> {
-        const account = await this.accountModel.findOne({ email }).exec();
-        if (!account) {
+    async findById(id: string): Promise<Account | null> {
+        try {
+            const account = await this.accountModel.findById(id).exec();
+            if (!account) {
+                throw new NotFoundException('Conta não encontrada');
+            }
+            return account;
+        } catch (error) {
             throw new NotFoundException('Conta não encontrada');
         }
-        return account;
+    }
+
+    async findByEmail(email: string): Promise<Account | null> {
+        try {
+            const account = await this.accountModel.findOne({ email }).exec();
+            if (!account) {
+                throw new NotFoundException('Conta não encontrada');
+            }
+            return account;
+        } catch (error) {
+            throw new NotFoundException('Conta não encontrada');
+        }
     }
 
     async update(id: string, updatedAccount: Account): Promise<Account> {
         const account = await this.findById(id);
+        if (!account) {
+            throw new NotFoundException('Conta não encontrada');
+        }
+        
         Object.assign(account, updatedAccount);
-        return await account.save();
+        const updated = await account.save();
+        return updated;
     }
 
     async delete(id: string): Promise<boolean> {
@@ -46,11 +71,16 @@ export class AccountService {
         return result.deletedCount > 0;
     }
 
-    async authenticate(email: string, senha: string): Promise<Account> {
-        const account = await this.accountModel.findOne({ email, senha }).exec();
-        if (!account) {
+    async authenticate(email: string, senha: string): Promise<Account | null> {
+        try {
+            const account = await this.accountModel.findOne({ email, senha }).exec();
+            if (!account) {
+                throw new NotFoundException('Credenciais inválidas');
+            }
+            return account;
+        } catch (error) {
             throw new NotFoundException('Credenciais inválidas');
         }
-        return account;
     }
+
 }
