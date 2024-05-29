@@ -1,6 +1,7 @@
 import { Document } from 'mongoose';
 
 export interface Account extends Document {
+    password: string;
     email: string;
     telefone: string;
     nome: string;

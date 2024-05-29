@@ -8,7 +8,6 @@ import { AccountModule } from 'src/account/account.module';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'Transaction', schema: TransactionSchema }]),
-    AccountModule,
   ],
   controllers: [TransactionsController],
   providers: [TransactionsService],
