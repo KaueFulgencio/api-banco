@@ -132,3 +132,8 @@ Sempre utilize o `localhost:3000` como `base_url`.
     ```json
     true
     ```
+
+SEGURANÇA
+Autenticação Multifator (MFA).
+Autorização Baseada em Funções.
+Gerenciamento de Sessão.
