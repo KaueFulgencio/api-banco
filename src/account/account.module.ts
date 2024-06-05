@@ -7,14 +7,19 @@ import { AccountController } from './account.controller';
 import { AccountService } from './account.service';
 import { AccountSchema } from './interfaces/schemas/account.schema';
 import { TransactionSchema } from './interfaces/schemas/transaction.schema';
+import { NotificationModule } from '../notification/notification.module'; 
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'Account', schema: AccountSchema }, { name: 'Transaction', schema: TransactionSchema }]),
+    MongooseModule.forFeature([
+      { name: 'Account', schema: AccountSchema },
+      { name: 'Transaction', schema: TransactionSchema },
+    ]),
     PassportModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    NotificationModule,
   ],
   controllers: [AccountController],
   providers: [AccountService],

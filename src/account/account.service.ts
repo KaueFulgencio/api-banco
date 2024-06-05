@@ -5,31 +5,44 @@ import { CreateAccountRequest, CreateAccountResponse } from './Models';
 import { Account } from '../account/interfaces/account.interface';
 import { UpdateBalanceRequest } from './dto/update-amount.dto';
 import { Transaction } from './interfaces/transaction.interface';
+import { NotificationService } from 'src/notification/notification.service';
+import { Notification } from 'src/notification/interfaces/notification.interface';
 
 @Injectable()
 export class AccountService {
     private readonly logger = new Logger(AccountService.name);
 
-    constructor(@InjectModel('Account') private readonly accountModel: Model<Account>,
-    @InjectModel('Transaction') private readonly transactionModel: Model<Transaction>) {}
+    constructor(
+    @InjectModel('Account') private readonly accountModel: Model<Account>,
+    @InjectModel('Transaction') private readonly transactionModel: Model<Transaction>,
+    //@InjectModel('Notification') private readonly notificationModel: Model<Notification>,
+    private readonly notificationService: NotificationService
+) {}
 
     async create(createAccountRequest: CreateAccountRequest): Promise<CreateAccountResponse> {
         this.logger.log(`Creating account for email: ${createAccountRequest.email}`);
-        const newAccount = new this.accountModel(createAccountRequest);
-        const savedAccount = await newAccount.save();
-        this.logger.log(`Account created with ID: ${savedAccount._id}`);
-        return {
-            success: true,
-            message: 'Conta criada com sucesso',
-            account: savedAccount
-        };
+        try {
+            const existingAccount = await this.accountModel.findOne({ email: createAccountRequest.email }).exec();
+            if (existingAccount) {
+                throw new BadRequestException('Já existe uma conta com este email');
+            }
+            const newAccount = new this.accountModel(createAccountRequest);
+            const savedAccount = await newAccount.save();
+            this.logger.log(`Account created with ID: ${savedAccount._id}`);
+            return {
+                success: true,
+                message: 'Conta criada com sucesso',
+                account: savedAccount
+            };
+        } catch (error) {
+            throw new Error('Erro ao criar conta: ' + error.message);
+        }
     }
 
     async updateBalance(id: string, updateBalanceRequest: UpdateBalanceRequest): Promise<Account> {
         this.logger.log(`Updating balance for account ID: ${id}`);
         const account = await this.findById(id);
         if (!account) {
-            this.logger.warn(`Account not found for ID: ${id}`);
             throw new NotFoundException('Conta não encontrada');
         }
         account.saldo += updateBalanceRequest.amount;
@@ -43,12 +56,10 @@ export class AccountService {
         try {
             const account = await this.accountModel.findById(id).exec();
             if (!account) {
-                this.logger.warn(`Account not found for ID: ${id}`);
                 throw new NotFoundException('Conta não encontrada');
             }
             return account;
         } catch (error) {
-            this.logger.error(`Error finding account by ID: ${id}`, error.stack);
             throw new NotFoundException('Conta não encontrada');
         }
     }
@@ -72,7 +83,6 @@ export class AccountService {
         this.logger.log(`Updating account ID: ${id}`);
         const account = await this.findById(id);
         if (!account) {
-            this.logger.warn(`Account not found for ID: ${id}`);
             throw new NotFoundException('Conta não encontrada');
         }
         Object.assign(account, updatedAccount);
@@ -98,16 +108,13 @@ export class AccountService {
         try {
             const account = await this.accountModel.findOne({ email }).exec();
             if (!account) {
-                this.logger.warn(`Invalid credentials for email: ${email}`);
                 throw new NotFoundException('Credenciais inválidas');
             }
             if (account.senha !== senha) {
-                this.logger.warn(`Invalid credentials for email: ${email}`);
                 throw new NotFoundException('Credenciais inválidas');
             }
             return account;
         } catch (error) {
-            this.logger.error(`Error authenticating account with email: ${email}`, error.stack);
             throw new NotFoundException('Credenciais inválidas');
         }
     }
@@ -116,7 +123,6 @@ export class AccountService {
         this.logger.log(`Getting balance for account ID: ${id}`);
         const account = await this.findById(id);
         if (!account) {
-            this.logger.warn(`Account not found for ID: ${id}`);
             throw new NotFoundException('Conta não encontrada');
         }
         const balance = account.saldo;
@@ -166,26 +172,29 @@ export class AccountService {
     async registerTransaction(accountId: string, type: 'entrada' | 'saída', amount: number, description?: string): Promise<Account> {
         const account = await this.accountModel.findById(accountId);
         if (!account) {
-            throw new NotFoundException('Conta não encontrada');
+          throw new NotFoundException('Conta não encontrada');
         }
     
         const transaction = new this.transactionModel({
-            type,
-            amount,
-            description,
+          type,
+          amount,
+          description,
         });
     
         try {
-            const savedTransaction = await transaction.save(); 
-            account.transacoes.push(savedTransaction);
-            account.saldo += type === 'entrada' ? amount : -amount; 
+          const savedTransaction = await transaction.save(); 
+          account.transacoes.push(savedTransaction);
+          account.saldo += type === 'entrada' ? amount : -amount; 
     
-            const updatedAccount = await account.save();
-            return updatedAccount;
+          const updatedAccount = await account.save();
+    
+          await this.notificationService.createNotification(accountId, `Nova transação registrada: ${description}`);
+    
+          return updatedAccount;
         } catch (error) {
-            throw new Error('Erro ao salvar transação: ' + error.message);
+          throw new Error('Erro ao salvar transação: ' + error.message);
         }
-    }
+      }
     
     
     async listTransactions(accountId: string): Promise<Transaction[]> {
