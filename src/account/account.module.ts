@@ -1,33 +1,28 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 
 import { AccountController } from './account.controller';
 import { AccountService } from './account.service';
-import { AccountSchema } from './interfaces/account.schema';
-import { JwtStrategy } from '../auth/JwtStrategy';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AccountSchema } from './interfaces/schemas/account.schema';
+import { TransactionSchema } from './interfaces/schemas/transaction.schema';
+import { NotificationModule } from '../notification/notification.module'; 
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'Account', schema: AccountSchema }]),
+    MongooseModule.forFeature([
+      { name: 'Account', schema: AccountSchema },
+      { name: 'Transaction', schema: TransactionSchema },
+    ]),
     PassportModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '60m' },
-      }),
-      inject: [ConfigService],
-    }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    NotificationModule,
   ],
   controllers: [AccountController],
-  providers: [AccountService, JwtStrategy, JwtAuthGuard],
+  providers: [AccountService],
   exports: [AccountService],
 })
 export class AccountModule {}
