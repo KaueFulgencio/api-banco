@@ -5,13 +5,16 @@ import { AccountModule } from './account/account.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { NotificationModule } from './notification/notification.module';
 import { AuthModule } from './auth/auth.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
     MongooseModule.forRoot('mongodb+srv://kauemf:ccrh2OsywqgXQPeb@cluster0.bziub7c.mongodb.net/'),
     AccountModule,
     NotificationModule,
-    AuthModule],
+    AuthModule,
+    TransactionModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

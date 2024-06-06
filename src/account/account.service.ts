@@ -6,7 +6,6 @@ import { Account } from '../account/interfaces/account.interface';
 import { UpdateBalanceRequest } from './dto/update-amount.dto';
 import { Transaction } from './interfaces/transaction.interface';
 import { NotificationService } from 'src/notification/notification.service';
-import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class AccountService {
@@ -14,10 +13,8 @@ export class AccountService {
 
     constructor(
     @InjectModel('Account') private readonly accountModel: Model<Account>,
-    @InjectModel('Transaction') private readonly transactionModel: Model<Transaction>,
-    //@InjectModel('Notification') private readonly notificationModel: Model<Notification>,
-    private readonly notificationService: NotificationService,
-    private readonly authService: AuthService,
+    //@InjectModel('Transaction') private readonly transactionModel: Model<Transaction>,
+    //private readonly notificationService: NotificationService,
 ) {}
 
     async create(createAccountRequest: CreateAccountRequest): Promise<CreateAccountResponse> {
@@ -65,6 +62,14 @@ export class AccountService {
         }
     }
 
+    async findAccountWithTransactions(id: string): Promise<Account> {
+        const account = await this.accountModel.findById(id).populate('transacoes').exec();
+        if (!account) {
+          throw new NotFoundException('Conta não encontrada');
+        }
+        return account;
+      }
+
     async findByEmail(email: string): Promise<Account | null> {
         this.logger.log(`Finding account by email: ${email}`);
         try {
@@ -104,23 +109,6 @@ export class AccountService {
         return success;
     }
 
-    async authenticate(email: string, senha: string): Promise<Account | null> {
-        this.logger.log(`Authenticating account with email: ${email}`);
-        try {
-            const account = await this.accountModel.findOne({ email }).exec();
-            if (!account) {
-                throw new NotFoundException('Credenciais inválidas');
-            }
-            if (account.senha !== senha) {
-                throw new NotFoundException('Credenciais inválidas');
-            }
-            return account;
-        } catch (error) {
-            throw new NotFoundException('Credenciais inválidas');
-        }
-    }
-
-    
     async getBalance(id: string): Promise<number> {
         this.logger.log(`Getting balance for account ID: ${id}`);
         const account = await this.findById(id);
@@ -170,7 +158,7 @@ export class AccountService {
             createdAt: pixKey.createdAt,
         }));
     }
-    
+    /*
     async registerTransaction(accountId: string, type: 'entrada' | 'saída', amount: number, description?: string): Promise<Account> {
         const account = await this.accountModel.findById(accountId);
         if (!account) {
@@ -210,5 +198,5 @@ export class AccountService {
         }
 
         return account.transacoes;
-    }
+    }*/
 }

@@ -17,7 +17,6 @@ import { AccountService } from './account.service';
 import { CreateAccountRequest, CreateAccountResponse } from './Models';
 import { Account } from '../account/interfaces/account.interface';
 import { UpdateBalanceRequest } from './dto/update-amount.dto';
-import { Transaction } from './interfaces/transaction.interface';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('accounts')
@@ -100,7 +99,7 @@ export class AccountController {
   async updateBalance(@Param('id') id: string, @Body() updateBalanceRequest: UpdateBalanceRequest) {
     return this.accountService.updateBalance(id, updateBalanceRequest);
   }
-
+  /*
   @Post(':id/transaction')
     async registerTransaction(
         @Param('id') id: string,
@@ -115,7 +114,5 @@ export class AccountController {
   @Get(':id/transactions')
   async listTransactions(@Param('id') id: string): Promise<Transaction[]> {
     return this.accountService.listTransactions(id);
-}
-
-
+  }*/
 }
