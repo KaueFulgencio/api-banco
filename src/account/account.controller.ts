@@ -11,12 +11,14 @@ import {
   NotFoundException,
   Logger,
   Patch,
+  UseGuards 
 } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { CreateAccountRequest, CreateAccountResponse } from './Models';
 import { Account } from '../account/interfaces/account.interface';
 import { UpdateBalanceRequest } from './dto/update-amount.dto';
 import { Transaction } from './interfaces/transaction.interface';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('accounts')
 export class AccountController {
@@ -64,6 +66,7 @@ export class AccountController {
   }
 
   @Get(':id/saldo')
+  @UseGuards(AuthGuard('jwt'))
   async getBalance(@Param('id') id: string): Promise<number> {
     this.logger.log(`Received request to get balance for account ID: ${id}`);
     const balance = await this.accountService.getBalance(id);

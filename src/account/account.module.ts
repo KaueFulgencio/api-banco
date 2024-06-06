@@ -8,6 +8,7 @@ import { AccountService } from './account.service';
 import { AccountSchema } from './interfaces/schemas/account.schema';
 import { TransactionSchema } from './interfaces/schemas/transaction.schema';
 import { NotificationModule } from '../notification/notification.module'; 
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { NotificationModule } from '../notification/notification.module';
       isGlobal: true,
     }),
     NotificationModule,
+    AuthModule,
   ],
   controllers: [AccountController],
   providers: [AccountService],

@@ -6,7 +6,7 @@ import { Account } from '../account/interfaces/account.interface';
 import { UpdateBalanceRequest } from './dto/update-amount.dto';
 import { Transaction } from './interfaces/transaction.interface';
 import { NotificationService } from 'src/notification/notification.service';
-import { Notification } from 'src/notification/interfaces/notification.interface';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class AccountService {
@@ -16,7 +16,8 @@ export class AccountService {
     @InjectModel('Account') private readonly accountModel: Model<Account>,
     @InjectModel('Transaction') private readonly transactionModel: Model<Transaction>,
     //@InjectModel('Notification') private readonly notificationModel: Model<Notification>,
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
+    private readonly authService: AuthService,
 ) {}
 
     async create(createAccountRequest: CreateAccountRequest): Promise<CreateAccountResponse> {
@@ -119,6 +120,7 @@ export class AccountService {
         }
     }
 
+    
     async getBalance(id: string): Promise<number> {
         this.logger.log(`Getting balance for account ID: ${id}`);
         const account = await this.findById(id);
