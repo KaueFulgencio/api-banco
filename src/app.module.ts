@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { NotificationModule } from './notification/notification.module';
 import { AuthModule } from './auth/auth.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { PixModule } from './pix/pix.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { TransactionModule } from './transaction/transaction.module';
     NotificationModule,
     AuthModule,
     TransactionModule,
+    PixModule,
   ],
   controllers: [AppController],
   providers: [AppService],

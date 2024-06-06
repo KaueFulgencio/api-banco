@@ -1,5 +1,6 @@
 import { Document } from 'mongoose';
 import { Transaction } from './transaction.interface';
+import { Pix } from 'src/pix/interfaces/pix.interface';
 
 export interface Account extends Document {
     password: string;
@@ -13,5 +14,5 @@ export interface Account extends Document {
     urlFotoAccount: string;
     saldo: number;
     transacoes: Transaction[];
-    pixKeys: string[]; 
+    pixKeys: string[];
 }

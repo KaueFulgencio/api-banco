@@ -11,10 +11,12 @@ export const AccountSchema = new mongoose.Schema({
   tipo: { type: String },
   urlFotoAccount: { type: String },
   saldo: { type: Number, default: 0 },
+  pixKeys: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Pix' }],
+  /*
   pixKeys: {
     type: [PixKeySchema],
     default: [],
     validate: [(val: any[]) => val.length <= 5, '{PATH} exceeds the limit of 5']
-  },
+  },*/
   transacoes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transaction' }]
 }, { timestamps: true, collection: 'account' });
