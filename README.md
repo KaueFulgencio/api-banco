@@ -38,33 +38,36 @@ Sempre utilize o `localhost:3000` como `base_url`.
 - **Body:** JSON
     ```json
     {
-      "email": "exemplo@email.com",
-      "telefone": "(00) 12345-6789",
-      "nome": "Fulano de Tal",
-      "senha": "senha123",
-      "ocupacao": "Desenvolvedor",
-      "endereco": "Rua Exemplo, 123",
-      "tipo": "cliente",
-      "urlFotoAccount": "https://exemplo.com/foto.jpg"
+        "nome": "Jo da Silva",
+        "cpf": "12345678901",
+        "email": "joao.wilva@exeple.com",
+        "senha": "senha123",
+        "telefone": "11217654321",
+        "ocupacao": "Engenheiro",
+        "tipo": "MEI"
     }
+
     ```
 - **Resposta de Exemplo:**
     ```json
     {
-      "success": true,
-      "message": "Conta criada com sucesso",
-      "account": {
-        "_id": "5fec7c6a6df1475f42e91f32",
-        "email": "exemplo@email.com",
-        "telefone": "(00) 12345-6789",
-        "nome": "Fulano de Tal",
-        "senha": "senha123",
-        "ocupacao": "Desenvolvedor",
-        "endereco": "Rua Exemplo, 123",
-        "tipo": "cliente",
-        "urlFotoAccount": "https://exemplo.com/foto.jpg",
-        "__v": 0
-      }
+	"success": true,
+	"message": "Conta criada com sucesso",
+	"account": {
+		"email": "joao.wilva@exeple.com",
+		"telefone": "11217654321",
+		"nome": "Jo da Silva",
+		"senha": "senha123",
+		"ocupacao": "Engenheiro",
+		"tipo": "MEI",
+		"saldo": 0,
+		"transacoes": [],
+		"_id": "6660aab794fddd007ab7e331",
+		"pixKeys": [],
+		"createdAt": "2024-06-05T18:13:11.040Z",
+		"updatedAt": "2024-06-05T18:13:11.040Z",
+		"__v": 0
+	    }
     }
     ```
 
@@ -133,7 +136,121 @@ Sempre utilize o `localhost:3000` como `base_url`.
     true
     ```
 
-SEGURANÇA
-Autenticação Multifator (MFA).
-Autorização Baseada em Funções.
-Gerenciamento de Sessão.
+PIX
+#### Criar chave pix
+- **URL:** `POST /pix/:id`
+id: 6660aab794fddd007ab7e331
+- **Parâmetros de URL:**
+    - `id`: 6660aab794fddd007ab7e331
+- **Request:**
+    ```json
+    {
+        "type": "TELEFONE",
+        "key": "12991670492"
+    }
+
+    ```
+- **Resposta de Exemplo:**
+    ```json
+    {
+        "type": "TELEFONE",
+        "key": "12991670492",
+        "account": "6660aab794fddd007ab7e331",
+        "_id": "6661c66f58d5c71aee0a81bb",
+        "createdAt": "2024-06-06T14:23:43.938Z",
+        "__v": 0
+    }
+    ```
+#### Listar chave pix
+- **URL:** `GET /pix/:id`
+id: 6660aab794fddd007ab7e331
+- **Parâmetros de URL:**
+    - `id`: 6660aab794fddd007ab7e331
+
+    ```
+- **Resposta de Exemplo:**
+    ```json
+        [
+        {
+            "_id": "6661c4cb35ed73f6ac91951d",
+            "type": "TELEFONE",
+            "key": "12991670492",
+            "account": "6660aab794fddd007ab7e331",
+            "createdAt": "2024-06-06T14:16:43.094Z",
+            "__v": 0
+        }
+    ]
+    ```
+
+#### Excluir chave pix
+- **URL:** `DELETE /pix/:id/:id_chave_pix`
+id: 6660aab794fddd007ab7e331
+- **Parâmetros de URL:**
+    - `id`: 6660aab794fddd007ab7e331
+    - `id_chave_pix`: 6661c66f58d5c71aee0a81bb
+
+    ```
+- **Resposta de Exemplo:**
+    ```json
+    200 OK
+    ```
+
+Segurança - Autenticação - Autenticação Multifator (MFA) e Gerenciamento de Sessão.
+#### Registrar usuario
+
+- **URL:** `POST http://localhost:3000/auth/register`
+- **Body:** JSON
+    ```json
+    {
+        "email": "kaue@gmail.com",
+        "password": "senha"
+    }
+
+
+    ```
+#### Gerar token
+
+- **URL:** `POST /auth/login`
+- **Body:** JSON
+    ```json
+    {
+        "email": "kaue@gmail.com",
+        "password": "senha"
+    }
+
+    **Resposta de Exemplo:**
+    ```json
+    {
+	"access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlcyI6WyJ1c2VyIl0sImlhdCI6MTcxNzYzMTI4OSwiZXhwIjoxNzE3NjM0ODg5fQ.   VrJaj73JRP9Thi383vpLcTd14HG-KzqkePuwc-jqrkE"
+    }
+    ```
+
+    ```
+
+Notificações
+Autenticação
+#### Enviar notificação
+
+- **URL:** `POST /notifications`
+- **Body:** JSON
+    ```json
+    {
+        "userId": "60b8c0b8f8d5a12c4c8e4e10", 
+        "type": "info", 
+        "message": "Sua conta foi atualizada com sucesso.", 
+        "read": false
+    }
+
+    **Resposta de Exemplo:**
+    ```json
+    {
+        "userId": "60b8c0b8f8d5a12c4c8e4e10",
+        "message": "Sua conta foi atualizada com sucesso.",
+        "read": false,
+        "_id": "6660ef54d8d324c578035ceb",
+        "date": "2024-06-05T23:05:56.585Z",
+        "__v": 0
+    }
+    ```
+
+    ```
