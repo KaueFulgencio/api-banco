@@ -6,7 +6,6 @@ import { Account } from '../account/interfaces/account.interface';
 import { UpdateBalanceRequest } from './dto/update-amount.dto';
 import { Transaction } from './interfaces/transaction.interface';
 import { NotificationService } from 'src/notification/notification.service';
-import { Notification } from 'src/notification/interfaces/notification.interface';
 
 @Injectable()
 export class AccountService {
@@ -14,9 +13,6 @@ export class AccountService {
 
     constructor(
     @InjectModel('Account') private readonly accountModel: Model<Account>,
-    @InjectModel('Transaction') private readonly transactionModel: Model<Transaction>,
-    //@InjectModel('Notification') private readonly notificationModel: Model<Notification>,
-    private readonly notificationService: NotificationService
 ) {}
 
     async create(createAccountRequest: CreateAccountRequest): Promise<CreateAccountResponse> {
@@ -64,6 +60,14 @@ export class AccountService {
         }
     }
 
+    async findAccountWithTransactions(id: string): Promise<Account> {
+        const account = await this.accountModel.findById(id).populate('transacoes').exec();
+        if (!account) {
+          throw new NotFoundException('Conta não encontrada');
+        }
+        return account;
+      }
+
     async findByEmail(email: string): Promise<Account | null> {
         this.logger.log(`Finding account by email: ${email}`);
         try {
@@ -77,6 +81,14 @@ export class AccountService {
             this.logger.error(`Error finding account by email: ${email}`, error.stack);
             throw new NotFoundException('Conta não encontrada');
         }
+    }
+
+    async findAccountWithPixKeys(accountId: string): Promise<Account> {
+        const account = await this.accountModel.findById(accountId).populate('pixKeys').exec();
+        if (!account) {
+            throw new NotFoundException('Conta não encontrada');
+        }
+        return account;
     }
 
     async update(id: string, updatedAccount: Account): Promise<Account> {
@@ -101,22 +113,6 @@ export class AccountService {
             this.logger.warn(`Account not found for ID: ${id}`);
         }
         return success;
-    }
-
-    async authenticate(email: string, senha: string): Promise<Account | null> {
-        this.logger.log(`Authenticating account with email: ${email}`);
-        try {
-            const account = await this.accountModel.findOne({ email }).exec();
-            if (!account) {
-                throw new NotFoundException('Credenciais inválidas');
-            }
-            if (account.senha !== senha) {
-                throw new NotFoundException('Credenciais inválidas');
-            }
-            return account;
-        } catch (error) {
-            throw new NotFoundException('Credenciais inválidas');
-        }
     }
 
     async getBalance(id: string): Promise<number> {
@@ -167,46 +163,5 @@ export class AccountService {
             key: pixKey.key,
             createdAt: pixKey.createdAt,
         }));
-    }
-    
-    async registerTransaction(accountId: string, type: 'entrada' | 'saída', amount: number, description?: string): Promise<Account> {
-        const account = await this.accountModel.findById(accountId);
-        if (!account) {
-          throw new NotFoundException('Conta não encontrada');
-        }
-    
-        const transaction = new this.transactionModel({
-          type,
-          amount,
-          description,
-        });
-    
-        try {
-          const savedTransaction = await transaction.save(); 
-          account.transacoes.push(savedTransaction);
-          account.saldo += type === 'entrada' ? amount : -amount; 
-    
-          const updatedAccount = await account.save();
-    
-          await this.notificationService.createNotification(accountId, `Nova transação registrada: ${description}`);
-    
-          return updatedAccount;
-        } catch (error) {
-          throw new Error('Erro ao salvar transação: ' + error.message);
-        }
-      }
-    
-    
-    async listTransactions(accountId: string): Promise<Transaction[]> {
-        const account = await this.accountModel
-            .findById(accountId)
-            .populate('transacoes')
-            .exec();
-
-        if (!account) {
-            throw new NotFoundException('Conta não encontrada');
-        }
-
-        return account.transacoes;
     }
 }
