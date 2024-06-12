@@ -30,7 +30,7 @@ Certifique-se de ter o Node.js instalado em sua máquina. Em seguida, siga estas
 
 ### Endpoints
 
-Sempre utilize o `localhost:3000` como `base_url`.
+Sempre utilize o `localhost:3001` como `base_url`.
 
 #### Criar uma nova conta
 
@@ -198,7 +198,7 @@ id: 6660aab794fddd007ab7e331
 Segurança - Autenticação - Autenticação Multifator (MFA) e Gerenciamento de Sessão.
 #### Registrar usuario
 
-- **URL:** `POST http://localhost:3000/auth/register`
+- **URL:** `POST http://localhost:3001/auth/register`
 - **Body:** JSON
     ```json
     {
