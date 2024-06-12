@@ -30,7 +30,7 @@ Certifique-se de ter o Node.js instalado em sua máquina. Em seguida, siga estas
 
 ### Endpoints
 
-Sempre utilize o `localhost:3001` como `base_url`.
+Utilize o `localhost:3001` como `base_url`.
 
 #### Criar uma nova conta
 
