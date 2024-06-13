@@ -4,8 +4,7 @@ import { Model } from 'mongoose';
 import { CreateAccountRequest, CreateAccountResponse } from './Models';
 import { Account } from '../account/interfaces/account.interface';
 import { UpdateBalanceRequest } from './dto/update-amount.dto';
-import { Transaction } from './interfaces/transaction.interface';
-import { NotificationService } from 'src/notification/notification.service';
+import { UpdateAccountDto } from './interfaces/update-account.interface';
 
 @Injectable()
 export class AccountService {
@@ -91,16 +90,24 @@ export class AccountService {
         return account;
     }
 
-    async update(id: string, updatedAccount: Account): Promise<Account> {
-        this.logger.log(`Updating account ID: ${id}`);
-        const account = await this.findById(id);
+    async update(id: string, updatedAccount: UpdateAccountDto): Promise<Account> {
+        const account = await this.accountModel.findById(id);
         if (!account) {
             throw new NotFoundException('Conta não encontrada');
         }
+    
+        if (updatedAccount.pixKeys && !Array.isArray(updatedAccount.pixKeys)) {
+            updatedAccount.pixKeys = JSON.parse(updatedAccount.pixKeys); 
+        }
+    
         Object.assign(account, updatedAccount);
-        const updated = await account.save();
-        this.logger.log(`Account updated for ID: ${id}`);
-        return updated;
+    
+        try {
+            const updated = await account.save();
+            return updated;
+        } catch (error) {
+            throw new Error('Erro ao salvar a conta atualizada');
+        }
     }
 
     async delete(id: string): Promise<boolean> {
@@ -115,7 +122,7 @@ export class AccountService {
         return success;
     }
 
-    async getBalance(id: string): Promise<number> {
+    async getBalance(id: string): Promise<{ balance: number }> {
         this.logger.log(`Getting balance for account ID: ${id}`);
         const account = await this.findById(id);
         if (!account) {
@@ -123,7 +130,7 @@ export class AccountService {
         }
         const balance = account.saldo;
         this.logger.log(`Balance for account ID ${id}: ${balance}`);
-        return balance;
+        return { balance };
     }
 
     async createPixKey(accountId: string, type: string, key: string): Promise<Account> {

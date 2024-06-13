@@ -1,6 +1,5 @@
 import { Document } from 'mongoose';
 import { Transaction } from './transaction.interface';
-import { Pix } from 'src/pix/interfaces/pix.interface';
 
 export interface Account extends Document {
     password: string;

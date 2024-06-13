@@ -18,6 +18,7 @@ import { CreateAccountRequest, CreateAccountResponse } from './Models';
 import { Account } from '../account/interfaces/account.interface';
 import { UpdateBalanceRequest } from './dto/update-amount.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { UpdateAccountDto } from './interfaces/update-account.interface';
 
 @Controller('accounts')
 export class AccountController {
@@ -53,20 +54,22 @@ export class AccountController {
     return account;
   }
 
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() updatedAccount: Account): Promise<Account> {
-    this.logger.log(`Received request to update account ID: ${id}`);
-    const account = await this.accountService.update(id, updatedAccount);
-    if (!account) {
-      this.logger.warn(`Account not found for ID: ${id}`);
-      throw new NotFoundException('Conta não encontrada');
+  @Patch(':id')
+    async update(@Param('id') id: string, @Body() updatedAccount: UpdateAccountDto): Promise<Account> {
+        try {
+            const account = await this.accountService.update(id, updatedAccount);
+            return account;
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw new NotFoundException(error.message);
+            }
+            throw error;
+        }
     }
-    return account;
-  }
 
   @Get(':id/saldo')
-  @UseGuards(AuthGuard('jwt'))
-  async getBalance(@Param('id') id: string): Promise<number> {
+  //@UseGuards(AuthGuard('jwt'))
+  async getBalance(@Param('id') id: string): Promise<{ balance: number }> {
     this.logger.log(`Received request to get balance for account ID: ${id}`);
     const balance = await this.accountService.getBalance(id);
     return balance;
