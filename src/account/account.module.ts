@@ -8,6 +8,8 @@ import { AccountSchema } from './interfaces/schemas/account.schema';
 import { NotificationModule } from '../notification/notification.module';
 import { AuthModule } from '../auth/auth.module';
 import { TransactionModule } from '../transaction/transaction.module';
+import { JwtModule } from '@nestjs/jwt';
+import { jwtConstants } from 'src/auth/constants';
 
 @Module({
   imports: [
@@ -18,6 +20,10 @@ import { TransactionModule } from '../transaction/transaction.module';
     }),
     NotificationModule,
     AuthModule,
+    JwtModule.register({
+      secret: jwtConstants.secret,
+      signOptions: { expiresIn: '60s' }, 
+    }),
     forwardRef(() => TransactionModule),
   ],
   controllers: [AccountController],

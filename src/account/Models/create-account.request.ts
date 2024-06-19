@@ -8,4 +8,5 @@ export class CreateAccountRequest {
     endereco: string;
     tipo: string;
     urlFotoAccount: string;
+    password: string;
 }

@@ -86,22 +86,6 @@ export class AccountController {
     return deleted;
   }
 
-  @Post(':id/pix')
-  async createPixKey(@Param('id') id: string, @Body() pixKeyDto: { type: string, key: string }): Promise<Account> {
-    const { type, key } = pixKeyDto;
-    return this.accountService.createPixKey(id, type, key);
-  }
-
-
-  @Get(':id/pix')
-  async listPixKeys(@Param('id') id: string): Promise<{ type: string; key: string; createdAt: Date }[]> {
-    return this.accountService.listPixKeys(id);
-  }
-
-  @Patch(':id/balance')
-  async updateBalance(@Param('id') id: string, @Body() updateBalanceRequest: UpdateBalanceRequest) {
-    return this.accountService.updateBalance(id, updateBalanceRequest);
-  }
   /*
   @Post(':id/transaction')
     async registerTransaction(
