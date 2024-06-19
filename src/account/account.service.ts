@@ -27,11 +27,10 @@ export class AccountService {
           const newAccount = new this.accountModel(createAccountRequest);
           const savedAccount = await newAccount.save();
     
-          // Registre a conta no AuthService
           const createUserDto = {
             email: createAccountRequest.email,
             password: createAccountRequest.password,
-            roles: ['user']  // Ajuste conforme necessário
+            roles: ['user']  
           };
           const newUser = await this.authService.register(createUserDto);
           
