@@ -15,8 +15,8 @@ export class PixService {
     private readonly accountService: AccountService,
   ) {}
 
-  async createPixKey(accountId: string, createPixDto: CreatePixDto): Promise<Pix> {
-    const account: Account = await this.accountService.findById(accountId);
+  async createPixKey(email: string, createPixDto: CreatePixDto): Promise<Pix> {
+    const account: Account = await this.accountService.findAccountWithPixKeysByEmail(email);
     if (!account) {
       throw new NotFoundException('Conta não encontrada');
     }
@@ -25,7 +25,7 @@ export class PixService {
     }
     const newPixKey = new this.pixModel({
       ...createPixDto,
-      account: accountId,
+      account: account._id,
     });
     const savedPixKey = await newPixKey.save();
     account.pixKeys.push(savedPixKey._id);
@@ -33,16 +33,16 @@ export class PixService {
     return savedPixKey;
   }
 
-  async listPixKeys(accountId: string): Promise<Pix[]> {
-    const account: Account = await this.accountService.findAccountWithPixKeys(accountId);
+  async listPixKeys(email: string): Promise<Pix[]> {
+    const account: Account = await this.accountService.findAccountWithPixKeysByEmail(email);
     if (!account) {
       throw new NotFoundException('Conta não encontrada');
     }
     return account.pixKeys as unknown as Pix[];
   }
 
-  async deletePixKey(accountId: string, pixId: string): Promise<void> {
-    const account = await this.accountService.findById(accountId);
+  async deletePixKey(email: string, pixId: string): Promise<void> {
+    const account = await this.accountService.findAccountWithPixKeysByEmail(email);
     if (!account) {
       throw new NotFoundException('Conta não encontrada');
     }
@@ -72,8 +72,8 @@ export class PixService {
   async sendPix(sendPixDto: SendPixDto): Promise<SendPix> {
     const { fromAccount, toAccount, amount } = sendPixDto;
 
-    const senderAccount: Account = await this.accountService.findById(fromAccount);
-    const receiverAccount: Account = await this.accountService.findById(toAccount);
+    const senderAccount: Account = await this.accountService.findAccountWithPixKeys(fromAccount);
+    const receiverAccount: Account = await this.accountService.findAccountWithPixKeys(toAccount);
 
     if (!senderAccount || !receiverAccount) {
       throw new NotFoundException('Uma das contas não foi encontrada');

@@ -56,4 +56,9 @@ export class AuthService {
     }
     throw new UnauthorizedException('Invalid MFA code');
   }
+
+  async deleteAccount(email: string): Promise<boolean> {
+    const result = await this.userModel.deleteOne({ email }).exec();
+    return result.deletedCount > 0;
+  }
 }

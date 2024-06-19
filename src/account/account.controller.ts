@@ -54,33 +54,33 @@ export class AccountController {
     return account;
   }
 
-  @Patch(':id')
-    async update(@Param('id') id: string, @Body() updatedAccount: UpdateAccountDto): Promise<Account> {
-        try {
-            const account = await this.accountService.update(id, updatedAccount);
-            return account;
-        } catch (error) {
-            if (error instanceof NotFoundException) {
-                throw new NotFoundException(error.message);
-            }
-            throw error;
-        }
+  @Patch(':email')
+  async update(@Param('email') email: string, @Body() updatedAccount: UpdateAccountDto): Promise<Account> {
+    try {
+      const account = await this.accountService.updateByEmail(email, updatedAccount);
+      return account;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
     }
+  }
 
-  @Get(':id/saldo')
+  @Get(':email/saldo')
   //@UseGuards(AuthGuard('jwt'))
-  async getBalance(@Param('id') id: string): Promise<{ balance: number }> {
-    this.logger.log(`Received request to get balance for account ID: ${id}`);
-    const balance = await this.accountService.getBalance(id);
+  async getBalance(@Param('email') email: string): Promise<{ balance: number }> {
+    this.logger.log(`Received request to get balance for account email: ${email}`);
+    const balance = await this.accountService.getBalance(email);
     return balance;
   }
 
-  @Delete(':id')
-  async delete(@Param('id') id: string): Promise<boolean> {
-    this.logger.log(`Received request to delete account ID: ${id}`);
-    const deleted = await this.accountService.delete(id);
+  @Delete(':email')
+  async delete(@Param('email') email: string): Promise<boolean> {
+    this.logger.log(`Received request to delete email: ${email}`);
+    const deleted = await this.accountService.delete(email);
     if (!deleted) {
-      this.logger.warn(`Account not found for ID: ${id}`);
+      this.logger.warn(`Account not found for email: ${email}`);
       throw new NotFoundException('Conta não encontrada');
     }
     return deleted;

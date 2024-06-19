@@ -125,27 +125,58 @@ export class AccountService {
         }
     }
 
-    async delete(id: string): Promise<boolean> {
-        this.logger.log(`Deleting account ID: ${id}`);
-        const result = await this.accountModel.deleteOne({ _id: id }).exec();
+    async updateByEmail(email: string, updatedAccount: UpdateAccountDto): Promise<Account> {
+        const account = await this.accountModel.findOne({ email });
+        if (!account) {
+          throw new NotFoundException('Conta não encontrada');
+        }
+    
+        if (updatedAccount.pixKeys && !Array.isArray(updatedAccount.pixKeys)) {
+          updatedAccount.pixKeys = JSON.parse(updatedAccount.pixKeys); 
+        }
+    
+        Object.assign(account, updatedAccount);
+    
+        try {
+          const updated = await account.save();
+          return updated;
+        } catch (error) {
+          throw new Error('Erro ao salvar a conta atualizada');
+        }
+      }
+
+      async delete(email: string): Promise<boolean> {
+        this.logger.log(`Deleting account email: ${email}`);
+        const result = await this.accountModel.deleteOne({ email }).exec(); 
         const success = result.deletedCount > 0;
         if (success) {
-            this.logger.log(`Account deleted for ID: ${id}`);
+          this.logger.log(`Account deleted for email: ${email}`);
         } else {
-            this.logger.warn(`Account not found for ID: ${id}`);
+          this.logger.warn(`Account not found for email: ${email}`);
+          throw new NotFoundException('Conta não encontrada');
         }
         return success;
-    }
+      }
+    async getBalance(email: string): Promise<{ balance: number }> {
+      this.logger.log(`Getting balance for account email: ${email}`);
+      const account = await this.findByEmail(email);
+      if (!account) {
+          throw new NotFoundException('Conta não encontrada');
+      }
+      const balance = account.saldo;
+      this.logger.log(`Balance for account email ${email}: ${balance}`);
+      return { balance };
+     }
 
-    async getBalance(id: string): Promise<{ balance: number }> {
-        this.logger.log(`Getting balance for account ID: ${id}`);
-        const account = await this.findById(id);
+      async findAccountWithPixKeysByEmail(email: string): Promise<Account> {
+        const account = await this.accountModel
+          .findOne({ email })
+          .populate('pixKeys')
+          .exec();
         if (!account) {
-            throw new NotFoundException('Conta não encontrada');
+          throw new NotFoundException('Conta não encontrada');
         }
-        const balance = account.saldo;
-        this.logger.log(`Balance for account ID ${id}: ${balance}`);
-        return { balance };
-    }
-
+        return account;
+      }
+    
 }
