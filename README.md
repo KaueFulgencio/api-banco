@@ -1,3 +1,4 @@
+## BACKEND
 ## API do Banco
 
 Esta é uma API para gerenciamento de contas bancárias, incluindo operações como criação, recuperação, atualização e exclusão de contas.
@@ -92,6 +93,34 @@ Utilize o `localhost:3001` como `base_url`.
     }
     ```
 
+#### Recuperar uma conta por EMAIL
+
+- **URL:** `GET /accounts/:id`
+- **Request:** 
+    - `email` (string): O email da conta a ser recuperada.
+- **Resposta de Exemplo:**
+    ```json
+    {
+	"_id": "6679ba32d84a7d51f313d567",
+	"email": "usuario@gmail.com",
+	"telefone": "12322331",
+	"nome": "usuario tester parte 2",
+	"ocupacao": "desenvolvedor",
+	"endereco": "casa ali",
+	"tipo": "MEI",
+	"urlFotoAccount": "https://cdn-icons-png.flaticon.com/512/6073/6073873.png",
+	"saldo": 1019,
+	"pixKeys": [
+		"667af217287192a6bf1a70d4",
+		"667b07dda8bdb321f8132d1b"
+	],
+	"transacoes": [],
+	"createdAt": "2024-06-24T18:25:54.473Z",
+	"updatedAt": "2024-06-25T18:15:00.592Z",
+	"__v": 19
+    }
+    ```
+
 #### Atualizar uma conta existente
 
 - **URL:** `PUT /accounts/:id`
@@ -134,6 +163,18 @@ Utilize o `localhost:3001` como `base_url`.
 - **Response:**
     ```json
     true
+    ```
+
+#### Consultar saldo de uma conta
+
+- **URL:** `GET /accounts/:email/saldo`
+- **Parâmetros de URL:**
+    - `email` (string): O email da conta a ser atualizada.
+- **Resposta de Exemplo:**
+    ```json
+    {
+	    "balance": 1019
+    }
     ```
 
 PIX
@@ -332,4 +373,108 @@ Autenticação
     ```
 - **Resposta de Exemplo:**
     200 OK
+    ```
+
+Transactions
+#### Registrar transação 
+
+- **URL:** `POST /transaction/:email/transaction`
+    ```
+- **Body:** JSON
+    ```json
+    {
+    "type": "entrada",
+    "amount": 150.0,
+    "description": "Deposito inicial"
+    }
+
+
+    ```
+- **Resposta de Exemplo:**
+    ```json
+    [
+        {
+            "type": "entrada",
+            "amount": 150,
+            "date": "2024-06-25T18:30:33.357Z",
+            "description": "Deposito inicial",
+            "_id": "667b0cc9a8bdb321f8132d3f",
+            "__v": 0
+        }
+    ]
+    ```
+
+#### Listar transações
+
+- **URL:** `GET /transaction/:email/transactions`
+
+    ```
+- **Resposta de Exemplo:**
+    ```json
+    [
+        {
+            "_id": "667adf71a8036b3fcd738c0c",
+            "type": "entrada",
+            "amount": 232,
+            "description": "Pagamento recebido",
+            "date": "2024-06-25T15:17:05.077Z",
+            "__v": 0
+        },
+        {
+            "_id": "667ae0083b6842c693d586a2",
+            "type": "entrada",
+            "amount": 232,
+            "description": "Pagamento recebido",
+            "date": "2024-06-25T15:19:36.401Z",
+            "__v": 0
+        },
+        {
+            "_id": "667ae0488470a4f1ab4ee47d",
+            "type": "entrada",
+            "amount": 232,
+            "description": "Pagamento recebido",
+            "date": "2024-06-25T15:20:40.337Z",
+            "__v": 0
+        },
+        {
+            "_id": "667ae07b8a874cc3ddc61374",
+            "type": "entrada",
+            "amount": 232,
+            "description": "Pagamento recebido",
+            "date": "2024-06-25T15:21:31.535Z",
+            "__v": 0
+        },
+        {
+            "_id": "667ae0c7edd6f98c5bd891c5",
+            "type": "entrada",
+            "amount": 232,
+            "description": "Pagamento recebido",
+            "date": "2024-06-25T15:22:47.297Z",
+            "__v": 0
+        },
+        {
+            "_id": "667ae1752d6e0b8e84c080e0",
+            "type": "entrada",
+            "amount": 232,
+            "description": "Pagamento recebido",
+            "date": "2024-06-25T15:25:41.147Z",
+            "__v": 0
+        },
+        {
+            "_id": "667ae27b0e16161564a0c062",
+            "type": "entrada",
+            "amount": 232,
+            "description": "Pagamento recebido",
+            "date": "2024-06-25T15:30:03.101Z",
+            "__v": 0
+        },
+        {
+            "_id": "667ae29e0e16161564a0c06e",
+            "type": "entrada",
+            "amount": 10,
+            "description": "Pagamento recebido",
+            "date": "2024-06-25T15:30:38.114Z",
+            "__v": 0
+        }
+    ]
     ```
