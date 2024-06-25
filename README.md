@@ -254,3 +254,82 @@ Autenticação
     ```
 
     ```
+
+#### Enviar PIX
+
+- **URL:** `POST /accounts/send-pix`
+- **Body:** JSON
+    ```json
+    {
+	"fromEmail": "usuario@gmail.com",
+	"toEmail": "admin@gmail.com",
+	"amount": 290
+    }
+
+    ```
+- **Resposta de Exemplo:**
+    ```json
+    {
+	"success": true,
+	"message": "Transferência PIX realizada com sucesso"
+    }
+    ```
+
+#### Listar PIX
+
+- **URL:** `GET /pix/:email`
+    ```
+- **Resposta de Exemplo:**
+    ```json
+    [
+	{
+		"_id": "667af217287192a6bf1a70d4",
+		"type": "CHAVE_ALEATORIA",
+		"key": "UFb8L1qOZ6CoLwXv",
+		"account": "6679ba32d84a7d51f313d567",
+		"createdAt": "2024-06-25T16:36:39.456Z",
+		"__v": 0
+	},
+	{
+		"_id": "667b07dda8bdb321f8132d1b",
+		"type": "TELEFONE",
+		"key": "45991670431",
+		"account": "6679ba32d84a7d51f313d567",
+		"createdAt": "2024-06-25T18:09:33.865Z",
+		"__v": 0
+	}
+   ]
+    ```
+
+#### Criar chave PIX
+
+- **URL:** `POST /pix/:email`
+- **Body:** JSON
+    ```json
+    {
+  	"type": "TELEFONE",
+  	"key": "45991670431"
+    }
+
+
+    ```
+- **Resposta de Exemplo:**
+    ```json
+    {
+	"type": "TELEFONE",
+	"key": "45991670431",
+	"account": "6679ba32d84a7d51f313d567",
+	"_id": "667b07dda8bdb321f8132d1b",
+	"createdAt": "2024-06-25T18:09:33.865Z",
+	"__v": 0
+   }
+    ```
+
+#### Deletar chave PIX
+
+- **URL:** `DELETE /pix/:email/:idchavepix`
+
+    ```
+- **Resposta de Exemplo:**
+    200 OK
+    ```
