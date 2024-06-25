@@ -1,28 +1,37 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { AccountService } from '../account/account.service';
-import { Pix, SendPix } from './interfaces/pix.interface';
-import { SendPixDto } from './dto/send-pix.dto';
+import { Pix} from './interfaces/pix.interface';
 import { Account } from '../account/interfaces/account.interface';
 import { CreatePixDto } from './dto/create-pix.dto';
 
 @Injectable()
 export class PixService {
+  private readonly logger = new Logger(PixService.name);
+  
   constructor(
     @InjectModel('Pix') private readonly pixModel: Model<Pix>,
-    @InjectModel('PixTransaction') private readonly pixTransactionModel: Model<SendPix>,
     private readonly accountService: AccountService,
   ) {}
 
   async createPixKey(email: string, createPixDto: CreatePixDto): Promise<Pix> {
     const account: Account = await this.accountService.findAccountWithPixKeysByEmail(email);
     if (!account) {
+      this.logger.error(`Conta não encontrada para o email ${email}`);
       throw new NotFoundException('Conta não encontrada');
     }
     if (account.pixKeys.length >= 5) {
+      this.logger.error(`Limite máximo de chaves Pix atingido para a conta ${account._id}`);
       throw new BadRequestException('Limite máximo de chaves Pix atingido');
     }
+  
+    const existingPixKey = await this.pixModel.findOne({ key: createPixDto.key }).exec();
+    if (existingPixKey) {
+      this.logger.error(`Chave Pix duplicada: ${createPixDto.key}`);
+      throw new BadRequestException('Chave Pix já existe');
+    }
+  
     const newPixKey = new this.pixModel({
       ...createPixDto,
       account: account._id,
@@ -36,9 +45,10 @@ export class PixService {
   async listPixKeys(email: string): Promise<Pix[]> {
     const account: Account = await this.accountService.findAccountWithPixKeysByEmail(email);
     if (!account) {
+      this.logger.error(`Conta não encontrada para o email ${email}`);
       throw new NotFoundException('Conta não encontrada');
     }
-    return account.pixKeys as unknown as Pix[];
+    return this.pixModel.find({ _id: { $in: account.pixKeys } }).exec();
   }
 
   async deletePixKey(email: string, pixId: string): Promise<void> {
@@ -65,31 +75,7 @@ export class PixService {
       await this.pixModel.findByIdAndDelete(pixId);
     }
   
-    // Salva a conta atualizada
     await account.save();
   }
   
-  async sendPix(sendPixDto: SendPixDto): Promise<SendPix> {
-    const { fromAccount, toAccount, amount } = sendPixDto;
-
-    const senderAccount: Account = await this.accountService.findAccountWithPixKeys(fromAccount);
-    const receiverAccount: Account = await this.accountService.findAccountWithPixKeys(toAccount);
-
-    if (!senderAccount || !receiverAccount) {
-      throw new NotFoundException('Uma das contas não foi encontrada');
-    }
-
-    if (senderAccount.saldo < amount) {
-      throw new BadRequestException('Saldo insuficiente na conta de origem');
-    }
-
-    senderAccount.saldo -= amount;
-    receiverAccount.saldo += amount;
-
-    await senderAccount.save();
-    await receiverAccount.save();
-
-    const newPixTransaction = new this.pixTransactionModel({ fromAccount, toAccount, amount });
-    return await newPixTransaction.save();
-  }
 }

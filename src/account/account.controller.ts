@@ -11,7 +11,8 @@ import {
   NotFoundException,
   Logger,
   Patch,
-  UseGuards 
+  UseGuards, 
+  BadRequestException
 } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { CreateAccountRequest, CreateAccountResponse } from './Models';
@@ -19,6 +20,7 @@ import { Account } from '../account/interfaces/account.interface';
 import { UpdateBalanceRequest } from './dto/update-amount.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UpdateAccountDto } from './interfaces/update-account.interface';
+import { SendPixDto } from './dto/send-pix.dto';
 
 @Controller('accounts')
 export class AccountController {
@@ -85,6 +87,47 @@ export class AccountController {
     }
     return deleted;
   }
+
+  @Get(':pixKey')
+  async findAccountByPixKey(@Param('pixKey') pixKey: string): Promise<Account> {
+    try {
+      const account = await this.accountService.findAccountByPixKey(pixKey);
+      if (!account) {
+        throw new NotFoundException('Conta não encontrada para o pixKey fornecido');
+      }
+      return account;
+    } catch (error) {
+      throw new BadRequestException('Erro ao buscar conta pelo pixKey');
+    }
+  }
+
+  @Get(':email/pix-keys')
+  async findAccountWithPixKeysByEmail(@Param('email') email: string): Promise<Account> {
+    this.logger.log(`Searching account with email: ${email}`); 
+
+    try {
+      const account = await this.accountService.findAccountWithPixKeysByEmail(email);
+      if (!account) {
+        throw new NotFoundException('Conta não encontrada pix keys ny email');
+      }
+      return account;
+    } catch (error) {
+      this.logger.error(`Error finding account by email: ${error.message}`, error.stack);
+      throw new BadRequestException('Erro ao buscar conta pelo email');
+    }
+  }
+
+  @Post('send-pix')
+    async sendPix(@Body() sendPixDto: SendPixDto): Promise<{ success: boolean, message: string }> {
+        const { fromEmail, toEmail, amount } = sendPixDto;
+
+        if (fromEmail === toEmail) {
+            throw new BadRequestException('A conta de origem e destino não podem ser iguais');
+        }
+
+        return this.accountService.sendPix(fromEmail, toEmail, amount);
+    }
+
 
   /*
   @Post(':id/transaction')

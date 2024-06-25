@@ -10,19 +10,20 @@ export class TransactionController {
     private readonly transactionService: TransactionService,
   ) {}
 
-  @Post(':id/transaction')
+  @Post(':email/transaction')
   async registerTransaction(
-    @Param('id') id: string,
+    @Param('email') email: string,
     @Body('type') type: 'entrada' | 'saída',
     @Body('amount') amount: number,
     @Body('description') description?: string
-  ) {
-    const updatedAccount = await this.transactionService.registerTransaction(id, type, amount, description);
+  ): Promise<Transaction[]> {
+    const updatedAccount = await this.transactionService.registerTransaction(email, type, amount, description);
     return updatedAccount.transacoes;
   }
 
-  @Get(':id/transactions')
-  async listTransactions(@Param('id') id: string): Promise<Transaction[]> {
-    return this.transactionService.listTransactions(id);
+  @Get(':email/transactions')
+  async listTransactions(@Param('email') email: string): Promise<Transaction[]> {
+    return this.transactionService.listTransactions(email);
   }
+
 }

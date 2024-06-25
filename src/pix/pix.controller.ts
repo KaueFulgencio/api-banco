@@ -1,8 +1,9 @@
-import { Controller, Post, Get, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Body, Param, HttpException, HttpStatus, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PixService } from './pix.service';
 import { CreatePixDto } from './dto/create-pix.dto';
 import { Pix, SendPix } from './interfaces/pix.interface';
-import { SendPixDto } from './dto/send-pix.dto';
+import { SendPixByEmailDto} from './dto/send-pix.dto';
+import { Account } from 'src/account/interfaces/account.interface';
 
 @Controller('pix')
 export class PixController {
@@ -28,9 +29,5 @@ export class PixController {
   ): Promise<void> {
     return this.pixService.deletePixKey(email, pixId);
   }
-  /*
-  @Post('send')
-  async sendPix(@Body() sendPixDto: SendPixDto): Promise<SendPix> {
-    return this.pixService.sendPix(sendPixDto);
-  }*/
+
 }

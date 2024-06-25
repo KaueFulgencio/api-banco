@@ -14,35 +14,35 @@ export class TransactionService {
     private readonly accountService: AccountService,
   ) {}
 
-  async registerTransaction(accountId: string, type: 'entrada' | 'saída', amount: number, description?: string): Promise<Account> {
-    const account = await this.accountService.findById(accountId);
+  async registerTransaction(email: string, type: 'entrada' | 'saída', amount: number, description?: string): Promise<Account> {
+    const account = await this.accountService.findByEmail(email);
     if (!account) {
       throw new NotFoundException('Conta não encontrada');
     }
-
+  
     const transaction = new this.transactionModel({
       type,
       amount,
       description,
     });
-
+  
     try {
       const savedTransaction = await transaction.save();
       account.transacoes.push(savedTransaction);
       account.saldo += type === 'entrada' ? amount : -amount;
-
+  
       const updatedAccount = await account.save();
-
-      await this.notificationService.createNotification(accountId, `Nova transação registrada: ${description}`);
-
+  
       return updatedAccount;
     } catch (error) {
       throw new Error('Erro ao salvar transação: ' + error.message);
     }
   }
+  
 
-  async listTransactions(accountId: string): Promise<Transaction[]> {
-    const account = await this.accountService.findAccountWithTransactions(accountId);
+  async listTransactions(email: string): Promise<Transaction[]> {
+    const account = await this.accountService.findAccountWithTransactions(email);
     return account.transacoes;
   }
+  
 }

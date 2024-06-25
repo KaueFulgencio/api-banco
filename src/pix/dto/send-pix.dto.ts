@@ -1,13 +1,9 @@
-import { IsString, IsNotEmpty, IsNumber, Min } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsNumber, Min } from 'class-validator';
 
-export class SendPixDto {
-  @IsString()
+export class SendPixByEmailDto {
+  @IsEmail()
   @IsNotEmpty()
-  readonly fromAccount: string;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly toAccount: string;
+  readonly toAccountEmail: string;
 
   @IsNumber()
   @Min(0.01)

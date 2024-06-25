@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateAccountRequest, CreateAccountResponse } from './Models';
@@ -74,13 +74,13 @@ export class AccountService {
         }
     }
 
-    async findAccountWithTransactions(id: string): Promise<Account> {
-        const account = await this.accountModel.findById(id).populate('transacoes').exec();
-        if (!account) {
-          throw new NotFoundException('Conta não encontrada');
-        }
-        return account;
+    async findAccountWithTransactions(email: string): Promise<Account> {
+      const account = await this.accountModel.findOne({ email }).populate('transacoes').exec();
+      if (!account) {
+        throw new NotFoundException('Conta não encontrada');
       }
+      return account;
+    }
 
     async findByEmail(email: string): Promise<Account | null> {
         this.logger.log(`Finding account by email: ${email}`);
@@ -157,6 +157,7 @@ export class AccountService {
         }
         return success;
       }
+      
     async getBalance(email: string): Promise<{ balance: number }> {
       this.logger.log(`Getting balance for account email: ${email}`);
       const account = await this.findByEmail(email);
@@ -168,15 +169,62 @@ export class AccountService {
       return { balance };
      }
 
-      async findAccountWithPixKeysByEmail(email: string): Promise<Account> {
-        const account = await this.accountModel
+     async findAccountWithPixKeysByEmail(email: string): Promise<Account> {
+      const account = await this.accountModel
           .findOne({ email })
           .populate('pixKeys')
           .exec();
-        if (!account) {
+      if (!account) {
+          this.logger.warn(`Conta não encontrada para o email: ${email}`);
           throw new NotFoundException('Conta não encontrada');
-        }
-        return account;
       }
+      return account;
+  }
     
+      async findAccountByPixKey(pixKey: string): Promise<Account> {
+        return await this.accountModel.findOne({ 'pixKeys.key': pixKey });
+      }
+
+      async sendPix(fromEmail: string, toEmail: string, amount: number): Promise<{ success: boolean, message: string }> {
+        this.logger.log(`Initiating PIX transfer from ${fromEmail} to ${toEmail} with amount: ${amount}`);
+
+        if (amount <= 0) {
+            throw new BadRequestException('O valor deve ser maior que zero');
+        }
+
+        const fromAccount = await this.findByEmail(fromEmail);
+        const toAccount = await this.findByEmail(toEmail);
+
+        if (!fromAccount || !toAccount) {
+            throw new NotFoundException('Uma das contas não foi encontrada');
+        }
+
+        if (fromAccount.saldo < amount) {
+            throw new BadRequestException('Saldo insuficiente na conta de origem');
+        }
+
+        const session = await this.accountModel.db.startSession();
+        session.startTransaction();
+
+        try {
+            fromAccount.saldo -= amount;
+            toAccount.saldo += amount;
+
+            await fromAccount.save({ session });
+            await toAccount.save({ session });
+
+            await session.commitTransaction();
+            session.endSession();
+
+            this.logger.log(`PIX transfer from ${fromEmail} to ${toEmail} completed successfully`);
+
+            return { success: true, message: 'Transferência PIX realizada com sucesso' };
+        } catch (error) {
+            await session.abortTransaction();
+            session.endSession();
+
+            this.logger.error(`Failed to complete PIX transfer from ${fromEmail} to ${toEmail}: ${error.message}`);
+            throw new InternalServerErrorException('Erro ao realizar transferência PIX');
+        }
+    }
 }

@@ -1,8 +1,8 @@
 import { Document } from 'mongoose';
 
 export interface Notification extends Document {
-    userId: string;
+    email: string;
     message: string;
-    date: Date;
+    createdAt: Date;
     read: boolean;
-}
+  }
