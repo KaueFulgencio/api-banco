@@ -1,8 +1,8 @@
-import * as mongoose from 'mongoose';
+import { Schema, Document } from 'mongoose';
 
-export const NotificationSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Account', required: true },
-    message: { type: String, required: true },
-    date: { type: Date, default: Date.now },
-    read: { type: Boolean, default: false },
+export const NotificationSchema = new Schema({
+  email: { type: String, required: true },  
+  message: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+  read: { type: Boolean, default: false },
 });

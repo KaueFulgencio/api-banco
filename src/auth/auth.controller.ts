@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Delete, Param, NotFoundException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -34,5 +34,15 @@ export class AuthController {
   @Post('mfa/verify')
   async verifyMfa(@Body() verifyMfaDto: VerifyMfaDto) {
     return this.authService.verifyMfa(verifyMfaDto);
+  }
+
+  //@UseGuards(JwtAuthGuard)
+  @Delete('delete-account/:email')
+  async deleteAccount(@Param('email') email: string) {
+    const deleted = await this.authService.deleteAccount(email);
+    if (!deleted) {
+      throw new NotFoundException('Conta não encontrada');
+    }
+    return { message: 'Conta deletada com sucesso' };
   }
 }

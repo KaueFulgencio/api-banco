@@ -1,30 +1,35 @@
-import { Controller, Post, Get, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { PixService } from './pix.service';
 import { CreatePixDto } from './dto/create-pix.dto';
-import { Pix } from './interfaces/pix.interface';
+import { Pix} from './interfaces/pix.interface';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('pix')
 export class PixController {
   constructor(private readonly pixService: PixService) {}
 
-  @Post(':accountId')
+  @Post(':email')
+  @UseGuards(AuthGuard('jwt'))
   async createPixKey(
-    @Param('accountId') accountId: string,
+    @Param('email') email: string,
     @Body() createPixDto: CreatePixDto,
   ): Promise<Pix> {
-    return this.pixService.createPixKey(accountId, createPixDto);
+    return this.pixService.createPixKey(email, createPixDto);
   }
 
-  @Get(':accountId')
-  async listPixKeys(@Param('accountId') accountId: string): Promise<Pix[]> {
-    return this.pixService.listPixKeys(accountId);
+  @Get(':email')
+  @UseGuards(AuthGuard('jwt'))
+  async listPixKeys(@Param('email') email: string): Promise<Pix[]> {
+    return this.pixService.listPixKeys(email);
   }
 
-  @Delete(':accountId/:pixId')
+  @Delete(':email/:pixId')
+  @UseGuards(AuthGuard('jwt'))
   async deletePixKey(
-    @Param('accountId') accountId: string,
+    @Param('email') email: string,
     @Param('pixId') pixId: string,
   ): Promise<void> {
-    return this.pixService.deletePixKey(accountId, pixId);
+    return this.pixService.deletePixKey(email, pixId);
   }
+
 }

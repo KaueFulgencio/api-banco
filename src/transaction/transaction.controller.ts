@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Param, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Logger, UseGuards } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { Transaction } from './interfaces/transaction.interface';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('transaction')
 export class TransactionController {
@@ -10,19 +11,22 @@ export class TransactionController {
     private readonly transactionService: TransactionService,
   ) {}
 
-  @Post(':id/transaction')
+  @Post(':email/transaction')
+  @UseGuards(AuthGuard('jwt'))
   async registerTransaction(
-    @Param('id') id: string,
+    @Param('email') email: string,
     @Body('type') type: 'entrada' | 'saída',
     @Body('amount') amount: number,
     @Body('description') description?: string
-  ) {
-    const updatedAccount = await this.transactionService.registerTransaction(id, type, amount, description);
+  ): Promise<Transaction[]> {
+    const updatedAccount = await this.transactionService.registerTransaction(email, type, amount, description);
     return updatedAccount.transacoes;
   }
 
-  @Get(':id/transactions')
-  async listTransactions(@Param('id') id: string): Promise<Transaction[]> {
-    return this.transactionService.listTransactions(id);
+  @Get(':email/transactions')
+  @UseGuards(AuthGuard('jwt'))
+  async listTransactions(@Param('email') email: string): Promise<Transaction[]> {
+    return this.transactionService.listTransactions(email);
   }
+
 }

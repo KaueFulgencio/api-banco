@@ -4,20 +4,19 @@ import {
   Body,
   Get,
   Param,
-  Put,
   Delete,
-  HttpCode,
-  HttpStatus,
   NotFoundException,
   Logger,
   Patch,
-  UseGuards 
+  UseGuards, 
+  BadRequestException
 } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { CreateAccountRequest, CreateAccountResponse } from './Models';
 import { Account } from '../account/interfaces/account.interface';
-import { UpdateBalanceRequest } from './dto/update-amount.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { UpdateAccountDto } from './interfaces/update-account.interface';
+import { SendPixDto } from './dto/send-pix.dto';
 
 @Controller('accounts')
 export class AccountController {
@@ -43,6 +42,7 @@ export class AccountController {
   }
 
   @Get('email/:email')
+  @UseGuards(AuthGuard('jwt'))
   async findByEmail(@Param('email') email: string): Promise<Account> {
     this.logger.log(`Received request to find account by email: ${email}`);
     const account = await this.accountService.findByEmail(email);
@@ -53,52 +53,84 @@ export class AccountController {
     return account;
   }
 
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() updatedAccount: Account): Promise<Account> {
-    this.logger.log(`Received request to update account ID: ${id}`);
-    const account = await this.accountService.update(id, updatedAccount);
-    if (!account) {
-      this.logger.warn(`Account not found for ID: ${id}`);
-      throw new NotFoundException('Conta não encontrada');
+  @Patch(':email')
+  @UseGuards(AuthGuard('jwt'))
+  async update(@Param('email') email: string, @Body() updatedAccount: UpdateAccountDto): Promise<Account> {
+    try {
+      const account = await this.accountService.updateByEmail(email, updatedAccount);
+      return account;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
     }
-    return account;
   }
 
-  @Get(':id/saldo')
+  @Get(':email/saldo')
   @UseGuards(AuthGuard('jwt'))
-  async getBalance(@Param('id') id: string): Promise<number> {
-    this.logger.log(`Received request to get balance for account ID: ${id}`);
-    const balance = await this.accountService.getBalance(id);
+  async getBalance(@Param('email') email: string): Promise<{ balance: number }> {
+    this.logger.log(`Received request to get balance for account email: ${email}`);
+    const balance = await this.accountService.getBalance(email);
     return balance;
   }
 
-  @Delete(':id')
-  async delete(@Param('id') id: string): Promise<boolean> {
-    this.logger.log(`Received request to delete account ID: ${id}`);
-    const deleted = await this.accountService.delete(id);
+  @Delete(':email')
+  @UseGuards(AuthGuard('jwt'))
+  async delete(@Param('email') email: string): Promise<boolean> {
+    this.logger.log(`Received request to delete email: ${email}`);
+    const deleted = await this.accountService.delete(email);
     if (!deleted) {
-      this.logger.warn(`Account not found for ID: ${id}`);
+      this.logger.warn(`Account not found for email: ${email}`);
       throw new NotFoundException('Conta não encontrada');
     }
     return deleted;
   }
 
-  @Post(':id/pix')
-  async createPixKey(@Param('id') id: string, @Body() pixKeyDto: { type: string, key: string }): Promise<Account> {
-    const { type, key } = pixKeyDto;
-    return this.accountService.createPixKey(id, type, key);
+  @Get(':pixKey')
+  @UseGuards(AuthGuard('jwt'))
+  async findAccountByPixKey(@Param('pixKey') pixKey: string): Promise<Account> {
+    try {
+      const account = await this.accountService.findAccountByPixKey(pixKey);
+      if (!account) {
+        throw new NotFoundException('Conta não encontrada para o pixKey fornecido');
+      }
+      return account;
+    } catch (error) {
+      throw new BadRequestException('Erro ao buscar conta pelo pixKey');
+    }
   }
 
+  @Get(':email/pix-keys')
+  @UseGuards(AuthGuard('jwt'))
+  async findAccountWithPixKeysByEmail(@Param('email') email: string): Promise<Account> {
+    this.logger.log(`Searching account with email: ${email}`); 
 
-  @Get(':id/pix')
-  async listPixKeys(@Param('id') id: string): Promise<{ type: string; key: string; createdAt: Date }[]> {
-    return this.accountService.listPixKeys(id);
+    try {
+      const account = await this.accountService.findAccountWithPixKeysByEmail(email);
+      if (!account) {
+        throw new NotFoundException('Conta não encontrada pix keys ny email');
+      }
+      return account;
+    } catch (error) {
+      this.logger.error(`Error finding account by email: ${error.message}`, error.stack);
+      throw new BadRequestException('Erro ao buscar conta pelo email');
+    }
   }
 
-  @Patch(':id/balance')
-  async updateBalance(@Param('id') id: string, @Body() updateBalanceRequest: UpdateBalanceRequest) {
-    return this.accountService.updateBalance(id, updateBalanceRequest);
-  }
+  @Post('send-pix')
+  @UseGuards(AuthGuard('jwt'))
+    async sendPix(@Body() sendPixDto: SendPixDto): Promise<{ success: boolean, message: string }> {
+        const { fromEmail, toEmail, amount } = sendPixDto;
+
+        if (fromEmail === toEmail) {
+            throw new BadRequestException('A conta de origem e destino não podem ser iguais');
+        }
+
+        return this.accountService.sendPix(fromEmail, toEmail, amount);
+    }
+
+
   /*
   @Post(':id/transaction')
     async registerTransaction(

@@ -16,7 +16,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(createUserDto: CreateUserDto): Promise<any> {
+  async register(createUserDto: CreateUserDto): Promise<User> {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const newUser = new this.userModel({
       ...createUserDto,
@@ -35,7 +35,7 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { username: user.username, sub: user.userId, roles: user.roles };
+    const payload = { username: user.email, sub: user._id };
     return {
       access_token: this.jwtService.sign(payload),
     };
@@ -55,5 +55,10 @@ export class AuthService {
       return { message: 'MFA verification successful' };
     }
     throw new UnauthorizedException('Invalid MFA code');
+  }
+
+  async deleteAccount(email: string): Promise<boolean> {
+    const result = await this.userModel.deleteOne({ email }).exec();
+    return result.deletedCount > 0;
   }
 }

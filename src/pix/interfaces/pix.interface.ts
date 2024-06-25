@@ -6,3 +6,10 @@ export interface Pix extends Document {
   createdAt: Date;
   account: string;
 }
+
+export interface SendPix extends Document {
+  fromAccount: string;
+  toAccount: string;
+  amount: number;
+  createdAt: Date;
+}
