@@ -4,10 +4,7 @@ import {
   Body,
   Get,
   Param,
-  Put,
   Delete,
-  HttpCode,
-  HttpStatus,
   NotFoundException,
   Logger,
   Patch,
@@ -17,7 +14,6 @@ import {
 import { AccountService } from './account.service';
 import { CreateAccountRequest, CreateAccountResponse } from './Models';
 import { Account } from '../account/interfaces/account.interface';
-import { UpdateBalanceRequest } from './dto/update-amount.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UpdateAccountDto } from './interfaces/update-account.interface';
 import { SendPixDto } from './dto/send-pix.dto';
@@ -46,6 +42,7 @@ export class AccountController {
   }
 
   @Get('email/:email')
+  @UseGuards(AuthGuard('jwt'))
   async findByEmail(@Param('email') email: string): Promise<Account> {
     this.logger.log(`Received request to find account by email: ${email}`);
     const account = await this.accountService.findByEmail(email);
@@ -57,6 +54,7 @@ export class AccountController {
   }
 
   @Patch(':email')
+  @UseGuards(AuthGuard('jwt'))
   async update(@Param('email') email: string, @Body() updatedAccount: UpdateAccountDto): Promise<Account> {
     try {
       const account = await this.accountService.updateByEmail(email, updatedAccount);
@@ -70,7 +68,7 @@ export class AccountController {
   }
 
   @Get(':email/saldo')
-  //@UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   async getBalance(@Param('email') email: string): Promise<{ balance: number }> {
     this.logger.log(`Received request to get balance for account email: ${email}`);
     const balance = await this.accountService.getBalance(email);
@@ -78,6 +76,7 @@ export class AccountController {
   }
 
   @Delete(':email')
+  @UseGuards(AuthGuard('jwt'))
   async delete(@Param('email') email: string): Promise<boolean> {
     this.logger.log(`Received request to delete email: ${email}`);
     const deleted = await this.accountService.delete(email);
@@ -89,6 +88,7 @@ export class AccountController {
   }
 
   @Get(':pixKey')
+  @UseGuards(AuthGuard('jwt'))
   async findAccountByPixKey(@Param('pixKey') pixKey: string): Promise<Account> {
     try {
       const account = await this.accountService.findAccountByPixKey(pixKey);
@@ -102,6 +102,7 @@ export class AccountController {
   }
 
   @Get(':email/pix-keys')
+  @UseGuards(AuthGuard('jwt'))
   async findAccountWithPixKeysByEmail(@Param('email') email: string): Promise<Account> {
     this.logger.log(`Searching account with email: ${email}`); 
 
@@ -118,6 +119,7 @@ export class AccountController {
   }
 
   @Post('send-pix')
+  @UseGuards(AuthGuard('jwt'))
     async sendPix(@Body() sendPixDto: SendPixDto): Promise<{ success: boolean, message: string }> {
         const { fromEmail, toEmail, amount } = sendPixDto;
 

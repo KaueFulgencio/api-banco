@@ -200,7 +200,7 @@ export class AccountService {
         }
 
         if (fromAccount.saldo < amount) {
-            throw new BadRequestException('Saldo insuficiente na conta de origem');
+            throw new BadRequestException('Saldo insuficiente');
         }
 
         const session = await this.accountModel.db.startSession();

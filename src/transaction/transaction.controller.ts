@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Param, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Logger, UseGuards } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { Transaction } from './interfaces/transaction.interface';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('transaction')
 export class TransactionController {
@@ -11,6 +12,7 @@ export class TransactionController {
   ) {}
 
   @Post(':email/transaction')
+  @UseGuards(AuthGuard('jwt'))
   async registerTransaction(
     @Param('email') email: string,
     @Body('type') type: 'entrada' | 'saída',
@@ -22,6 +24,7 @@ export class TransactionController {
   }
 
   @Get(':email/transactions')
+  @UseGuards(AuthGuard('jwt'))
   async listTransactions(@Param('email') email: string): Promise<Transaction[]> {
     return this.transactionService.listTransactions(email);
   }

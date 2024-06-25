@@ -7,7 +7,6 @@ import { AccountSchema } from 'src/account/interfaces/schemas/account.schema';
 import { TransactionSchema } from 'src/account/interfaces/schemas/transaction.schema';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule } from '@nestjs/config';
-import { AccountModule } from 'src/account/account.module';
 
 @Module({
     imports: [
